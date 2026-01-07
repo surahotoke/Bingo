@@ -1,0 +1,100 @@
+h1 {
+  margin: 0;
+  margin-bottom: 0.5rem;
+  font-size: 1.25rem;
+  font-weight: normal;
+}
+.bingo, .board {
+  width: 85dvmin;
+  aspect-ratio: 1;
+}
+.judge {
+  /* ::afterの長さを引きずり出す */
+  width: fit-content;
+}
+/* うまく情報を渡せるようにする */
+.judge::after, .board > label:has(:checked)::after {
+  color: transparent;
+  letter-spacing: calc(1px - 1ch);
+}
+.board {
+  /* paddingでview()の計算がずれないようにする */
+  box-sizing: border-box;
+  padding: min(1%, 8px);
+  border: 4px solid;
+  border-radius: 3%;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: min(3%, 8px);
+  /* .judgeに情報を渡すためにサイズ情報を無くす */
+  position: absolute;
+  /* スタートを押せるものと思わせる */
+  &:hover::before {
+    filter: brightness(0.8);
+  }
+  &:active::before {
+    filter: brightness(0.4);
+  }
+}
+.board::before {
+  background-color: #0507;
+  /* 重ねて中心に表示する */
+  position: absolute;
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  /* 字を調節 */
+  font-size: 2rem;
+  font-weight: bold;
+  font-style: oblique;
+  /* リザルトメッセージ */
+  counter-reset: result var(--BINGO);
+  --result: if(
+    style(--BINGO: 0): none;
+    else: counter(result, bingo) "ビンゴ!!";
+  );
+  content: var(--result);
+}
+/* スタート前 */
+.board:has(>:indeterminate)::before {
+  background-color: #f00c;
+  content: "ビンゴスタート!!";
+}
+/* 各マス */
+.board>label {
+  aspect-ratio: 1;
+  padding: 2%;
+  outline: solid 2px;
+  border-radius: 8%;
+  /* マス番号を設定 */
+  counter-reset: cell calc(sibling-index() - 1);
+  /* 真ん中はフリーマスにする */
+  --content: if(
+    style((--w: 2) and (--h: 2)): "FREE";
+    else: counter(cell);
+  );
+  /* マス番号 */
+  &::before {
+    font-size: 3vmin;
+    content: var(--content);
+    /* 表示が綺麗になる */
+    display: flex;
+  }
+  /* 空いたマス */
+  &:has(:checked) {
+    /* FREEは赤くする */
+    --background-color: if(
+      style((--w: 2) and (--h: 2)): pink;
+      else: lightblue;
+    );
+    background-color: var(--background-color);
+    /* ビンゴ情報の受け渡し用 */
+    &::after {
+      /* 計算するために左詰めにする */
+      position: absolute;
+      left: 0;
+    }
+  }
+}

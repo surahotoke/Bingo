@@ -1,0 +1,185 @@
+.bingo, .board {
+  /* overflowを明示してview-timelineの基準にする */
+  overflow: hidden;
+}
+.judge, .board>label:has(:checked)::after {
+  animation: scan linear reverse;
+  animation-timeline: view(x);
+  animation-range: contain cover;
+}
+/* 同時ビンゴ数を外側に引きずり出す用 */
+.judge {
+  /* ビンゴ判定のカウンター */
+  counter-reset: bingo;
+  /* 長さを--BINGOに横流し */
+  --BINGO: var(--data);
+  /* まだビンゴしていなければ操作できる */
+  --pointer-events: if(
+    style(--BINGO: 0): auto;
+    else: none;
+  );
+  pointer-events: var(--pointer-events);
+}
+.judge::after {
+  content: counter(bingo, zero);
+}
+/* ビンゴボード本体 */
+.board {
+  /* ランダムなseedにする */
+  animation: seed 10ms infinite;
+  /* ビンゴゲーム中 */
+  &:has(>:checked) {
+    /* seedを確定させる */
+    animation-play-state: paused;
+    /* seedを適用させてマスをバラバラにする */
+    &>label {
+      order: --random(sibling-index(), var(--seed));
+    }
+  }
+}
+/* 各マス */
+.board>label {
+  /* 各マスの位置を取得する(配置が違うのでsibling-index()では出せない) */
+  animation: linear reverse;
+  animation-name: w, h;
+  animation-timeline: view(x), view(y);
+  animation-range: contain;
+  /* 斜め */
+  --p: calc(var(--w) - var(--h));
+  --n: calc(var(--w) + var(--h));
+  /* ビンゴ判定ラインを設定 */
+  --wl: if(
+    style(--w: 0): w0;
+    style(--w: 1): w1;
+    style(--w: 2): w2;
+    style(--w: 3): w3;
+    else: w4;
+  );
+  --hl: if(
+    style(--h: 0): h0;
+    style(--h: 1): h1;
+    style(--h: 2): h2;
+    style(--h: 3): h3;
+    else: h4;
+  );
+  --pl: if(
+    style(--p: 0): p;
+    else: none;
+  );
+  --nl: if(
+    style(--n: 4): n;
+    else: none;
+  );
+  /* noneはcounterで有効になってしまうので */
+  --plcounter: if(
+    style(--pl: none): "";
+    else: counter(var(--pl), valid);
+  );
+  --nlcounter: if(
+    style(--nl: none): "";
+    else: counter(var(--nl), valid);
+  );
+  /* ビンゴしていればどれかは有効になる */
+  --bingo: counter(var(--wl), valid) counter(var(--hl), valid) var(--plcounter) var(--nlcounter);
+  /* 空いたマス */
+  &:has(:checked) {
+    /* ビンゴ判定を進める */
+    counter-increment: var(--wl) var(--hl) var(--pl) var(--nl);
+    /* ビンゴ情報 */
+    &::after {
+      content: var(--bingo);
+      /* ビンゴの回数が入る */
+      counter-increment: bingo var(--data);
+    }
+  }
+}
+/* numとseedによる擬似乱数生成 */
+@function --random(--num <integer>, --seed <number>) returns <integer> {
+  result: round(mod(524287 * sin(999983 * (var(--num) + 5007)) * (91 + 29 * cos(524287 * var(--seed))), 8191));
+}
+/* リザルト画面用 */
+@counter-style bingo {
+  system: cyclic;
+  symbols: "" "ダブル" "トリプル";
+}
+/* 同時ビンゴ数用 */
+@counter-style zero {
+  system: symbolic;
+  symbols: '0';
+  range: 1 4;
+  fallback: invalid;
+}
+/* ビンゴ判定用 */
+@counter-style valid {
+  system: cyclic;
+  symbols: '0';
+  range: 5 5;
+  fallback: invalid;
+}
+/* 無効な場合 */
+@counter-style invalid {
+  system: cyclic;
+  symbols: "";
+}
+/* ランダムなseed用 */
+@keyframes seed {
+  to {
+    --seed: 1;
+  }
+}
+/* 座標用 */
+@keyframes w {
+  to {
+    --w: 4;
+  }
+}
+@keyframes h {
+  to {
+    --h: 4;
+  }
+}
+/* ビンゴ判定 */
+@keyframes scan {
+  to {
+    --data: calc(85dvmin / 1px);
+  }
+}
+/* seed値 */
+@property --seed {
+  syntax: '<number>';
+  initial-value: 0;
+  inherits: true;
+}
+/* 横縦斜め座標 */
+@property --w {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+@property --h {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+@property --p {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+@property --n {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+/* ビンゴ判定 */
+@property --data {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: false;
+}
+/* 同時ビンゴ数 */
+@property --BINGO {
+  syntax: '<integer>';
+  initial-value: 0;
+  inherits: true;
+}
