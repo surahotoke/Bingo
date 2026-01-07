@@ -68,5 +68,11 @@ sequenceDiagram
 Pythonを使って自作乱数の精度の検証を行いました。（こちらはAIに任せた）  
 https://github.com/surahotoke/css-randomness-test
 
+## 関連作品
+- [リバーシ](https://github.com/surahotoke/Reversi)  
+これもHTMLとCSSのみで作っています。  
+これよりもだいぶ高度です。
+
 ## 更新履歴
-- 2025/01/07：初コミット
+- 2026/01/08：関連作品の欄を追加
+- 2026/01/07：初コミット
