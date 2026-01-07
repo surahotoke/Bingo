@@ -5,7 +5,7 @@ HTMLとCSSで作ったビンゴです。
 https://surahotoke.github.io/Bingo
 
 ## プレイ動画
-
+https://github.com/user-attachments/assets/2210b820-ccdd-43c7-ba4e-854ec1f1dfc0
 
 ## 遊び方
 1. はじめにビンゴ領域のどこかをクリックすると、毎回ランダムに配置されます。  
